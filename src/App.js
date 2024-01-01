@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+// APP COMPONENT
 export default function App() {
   const [items, setItems] = useState([]);
 
@@ -9,12 +10,20 @@ export default function App() {
     console.log(items);
   }
 
+  function handleRemoveItem(id) {
+    setItems(items.filter((item) => item.id !== id));
+  }
+
   return (
     <>
       <h1 className="title">Shopping Calculator</h1>
 
       <div className="calculator calc-flex">
-        <ShoppingList onAddItem={handleAddItem} items={items} />
+        <ShoppingList
+          onAddItem={handleAddItem}
+          items={items}
+          onRemoveItem={handleRemoveItem}
+        />
         <div className="right-flex">
           <BoughtList />
           <ListBalance />
@@ -24,9 +33,9 @@ export default function App() {
   );
 }
 
-// Components
+// COMPONENTS
 
-function ShoppingList({ onAddItem, items }) {
+function ShoppingList({ onAddItem, items, onRemoveItem }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   function handleFormOpen() {
@@ -40,7 +49,13 @@ function ShoppingList({ onAddItem, items }) {
       <div className="items-flex">
         <div className="items-container">
           {items.map((item) => (
-            <Item key={item.id} item={item.item} price={item.price} />
+            <Item
+              key={item.id}
+              id={item.id}
+              item={item.item}
+              price={item.price}
+              onRemoveItem={onRemoveItem}
+            />
           ))}
         </div>
 
@@ -56,14 +71,20 @@ function ShoppingList({ onAddItem, items }) {
   );
 }
 
-function Item({ item, price }) {
+function Item({ item, price, onRemoveItem, id }) {
   return (
     <div className="item">
       <p>{item}</p>
       <div className="item-content">
         <p className="price">£{price}</p>
         <Button style={{ backgroundColor: "#3C6E71" }}>Bought</Button>
-        <Button style={{ backgroundColor: "#F81616" }}>Remove</Button>
+        <Button
+          onClick={onRemoveItem}
+          id={id}
+          style={{ backgroundColor: "#F81616" }}
+        >
+          Remove
+        </Button>
       </div>
     </div>
   );
@@ -184,9 +205,9 @@ function ListBalance() {
   );
 }
 
-function Button({ children, style }) {
+function Button({ children, style, onClick, id }) {
   return (
-    <div className="button" style={style}>
+    <div className="button" style={style} onClick={() => onClick(id)}>
       {children}
     </div>
   );
