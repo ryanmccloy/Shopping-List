@@ -7,10 +7,8 @@ export default function App() {
 
       <div className="calculator calc-flex">
         <ShoppingList />
-
         <div className="right-flex">
           <BoughtList />
-
           <ListBalance />
         </div>
       </div>
@@ -18,20 +16,31 @@ export default function App() {
   );
 }
 
+// Components
+
 function ShoppingList() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  function handleFormOpen() {
+    setIsFormOpen((isFormOpen) => !isFormOpen);
+  }
+
   return (
     <div className="list border">
       <h2>What do you need?</h2>
 
       <div className="items-flex">
-        <div>
+        <div className="items-container">
           <Item />
           <Item />
         </div>
 
         <div className="form-flex">
-          {/* <ItemForm /> */}
-          <AddItem />
+          {isFormOpen ? (
+            <ItemForm onFormOpen={handleFormOpen} />
+          ) : (
+            <AddItem onFormOpen={handleFormOpen} />
+          )}
         </div>
       </div>
     </div>
@@ -51,15 +60,21 @@ function Item() {
   );
 }
 
-function AddItem() {
-  return <button className="add-item">Add Item</button>;
+function AddItem({ onFormOpen }) {
+  return (
+    <button className="add-item" onClick={onFormOpen}>
+      Add Item
+    </button>
+  );
 }
 
-function ItemForm() {
+function ItemForm({ onFormOpen }) {
   return (
     <div className="item-form">
       <h2>What do you want to add?</h2>
-
+      <button className="button close-button" onClick={onFormOpen}>
+        x
+      </button>
       <form className="form">
         <div className="form-item">
           <label className="label">Item</label>
