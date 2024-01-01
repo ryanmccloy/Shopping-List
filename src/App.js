@@ -1,12 +1,20 @@
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 export default function App() {
+  const [items, setItems] = useState([]);
+
+  function handleAddItem(item) {
+    setItems((items) => [...items, item]);
+    console.log(items);
+  }
+
   return (
     <>
       <h1 className="title">Shopping Calculator</h1>
 
       <div className="calculator calc-flex">
-        <ShoppingList />
+        <ShoppingList onAddItem={handleAddItem} items={items} />
         <div className="right-flex">
           <BoughtList />
           <ListBalance />
@@ -18,7 +26,7 @@ export default function App() {
 
 // Components
 
-function ShoppingList() {
+function ShoppingList({ onAddItem, items }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   function handleFormOpen() {
@@ -31,13 +39,14 @@ function ShoppingList() {
 
       <div className="items-flex">
         <div className="items-container">
-          <Item />
-          <Item />
+          {items.map((item) => (
+            <Item key={item.id} item={item.item} price={item.price} />
+          ))}
         </div>
 
         <div className="form-flex">
           {isFormOpen ? (
-            <ItemForm onFormOpen={handleFormOpen} />
+            <ItemForm onFormOpen={handleFormOpen} onAddItem={onAddItem} />
           ) : (
             <AddItem onFormOpen={handleFormOpen} />
           )}
@@ -47,12 +56,12 @@ function ShoppingList() {
   );
 }
 
-function Item() {
+function Item({ item, price }) {
   return (
     <div className="item">
-      <p>Shoes</p>
+      <p>{item}</p>
       <div className="item-content">
-        <p className="price">£90</p>
+        <p className="price">£{price}</p>
         <Button style={{ backgroundColor: "#3C6E71" }}>Bought</Button>
         <Button style={{ backgroundColor: "#F81616" }}>Remove</Button>
       </div>
@@ -68,25 +77,72 @@ function AddItem({ onFormOpen }) {
   );
 }
 
-function ItemForm({ onFormOpen }) {
+function ItemForm({ onFormOpen, onAddItem }) {
+  const [item, setItem] = useState("");
+  const [price, setPrice] = useState("");
+
+  function handleItem(e) {
+    e.preventDefault();
+    setItem(toUpperCase(e.target.value));
+  }
+
+  function toUpperCase(string) {
+    let convertedString = "";
+    for (let i = 0; i < string.length; i++) {
+      if (i === 0) {
+        convertedString += string[i].toUpperCase();
+      } else {
+        convertedString += string[i].toLowerCase();
+      }
+    }
+    return convertedString;
+  }
+
+  function handlePrice(e) {
+    e.preventDefault();
+    setPrice(e.target.value);
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const formattedPrice = parseFloat(price).toFixed(2);
+    onAddItem({ id: uuidv4(), item, price: formattedPrice });
+    setItem("");
+    setPrice("");
+    onFormOpen();
+  }
+
   return (
     <div className="item-form">
       <h2>What do you want to add?</h2>
       <button className="button close-button" onClick={onFormOpen}>
         x
       </button>
-      <form className="form">
+      <form className="form" onSubmit={handleSubmit}>
         <div className="form-item">
           <label className="label">Item</label>
-          <input type="" className="input"></input>
+          <input
+            type="text"
+            className="input"
+            value={item}
+            onChange={(e) => handleItem(e)}
+          ></input>
         </div>
         <div className="form-price">
-          <label className="label">Price</label>
-          <input type="" className="input"></input>
+          <label className="label">Price (£)</label>
+          <input
+            type="text"
+            className="input"
+            value={price}
+            onChange={(e) => handlePrice(e)}
+            steps="0.01"
+          ></input>
         </div>
 
         <div className="submit-button">
-          <AddItem />
+          <button type="submit" className="add-item">
+            Add Item
+          </button>
         </div>
       </form>
     </div>
