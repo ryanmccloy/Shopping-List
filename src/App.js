@@ -4,14 +4,31 @@ import { v4 as uuidv4 } from "uuid";
 // APP COMPONENT
 export default function App() {
   const [items, setItems] = useState([]);
+  const [boughtItems, setBoughtItems] = useState([]);
+  let totalBoughtItems = boughtItems
+    .reduce((acc, cur) => {
+      return acc + Number(cur.price);
+    }, 0)
+    .toFixed(2);
 
   function handleAddItem(item) {
     setItems((items) => [...items, item]);
-    console.log(items);
   }
 
-  function handleRemoveItem(id) {
+  function handleRemoveItem(item, price, id) {
     setItems(items.filter((item) => item.id !== id));
+  }
+
+  function handleBoughtItem(item, price, id) {
+    // remove bought item from list
+    setItems(items.filter((item) => item.id !== id));
+    // Add bought item to bought items list
+    setBoughtItems((boughtItems) => [...boughtItems, { item, price, id }]);
+  }
+
+  function handleClearBoughtItems() {
+    setBoughtItems([]);
+    // Set Total of bought items to 0
   }
 
   return (
@@ -23,9 +40,14 @@ export default function App() {
           onAddItem={handleAddItem}
           items={items}
           onRemoveItem={handleRemoveItem}
+          onBoughtItem={handleBoughtItem}
         />
         <div className="right-flex">
-          <BoughtList />
+          <BoughtList
+            boughtItems={boughtItems}
+            onClearBoughtItems={handleClearBoughtItems}
+            totalBoughtItemsPrice={totalBoughtItems}
+          />
           <ListBalance />
         </div>
       </div>
@@ -35,7 +57,7 @@ export default function App() {
 
 // COMPONENTS
 
-function ShoppingList({ onAddItem, items, onRemoveItem }) {
+function ShoppingList({ onAddItem, items, onRemoveItem, onBoughtItem }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   function handleFormOpen() {
@@ -55,6 +77,7 @@ function ShoppingList({ onAddItem, items, onRemoveItem }) {
               item={item.item}
               price={item.price}
               onRemoveItem={onRemoveItem}
+              onBoughtItem={onBoughtItem}
             />
           ))}
         </div>
@@ -71,13 +94,21 @@ function ShoppingList({ onAddItem, items, onRemoveItem }) {
   );
 }
 
-function Item({ item, price, onRemoveItem, id }) {
+function Item({ item, price, onRemoveItem, id, onBoughtItem }) {
   return (
     <div className="item">
       <p>{item}</p>
       <div className="item-content">
         <p className="price">£{price}</p>
-        <Button style={{ backgroundColor: "#3C6E71" }}>Bought</Button>
+        <Button
+          onClick={onBoughtItem}
+          id={id}
+          item={item}
+          price={price}
+          style={{ backgroundColor: "#3C6E71" }}
+        >
+          Bought
+        </Button>
         <Button
           onClick={onRemoveItem}
           id={id}
@@ -101,6 +132,7 @@ function AddItem({ onFormOpen }) {
 function ItemForm({ onFormOpen, onAddItem }) {
   const [item, setItem] = useState("");
   const [price, setPrice] = useState("");
+  const [error, setError] = useState("");
 
   function handleItem(e) {
     e.preventDefault();
@@ -126,10 +158,17 @@ function ItemForm({ onFormOpen, onAddItem }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    if (isNaN(price) || price.trim() === "") {
+      setError("Please enter a valid price.");
+      return;
+    }
+
     const formattedPrice = parseFloat(price).toFixed(2);
     onAddItem({ id: uuidv4(), item, price: formattedPrice });
     setItem("");
     setPrice("");
+    setError("");
     onFormOpen();
   }
 
@@ -160,6 +199,8 @@ function ItemForm({ onFormOpen, onAddItem }) {
           ></input>
         </div>
 
+        {error && <p className="error">{error}</p>}
+
         <div className="submit-button">
           <button type="submit" className="add-item">
             Add Item
@@ -170,30 +211,37 @@ function ItemForm({ onFormOpen, onAddItem }) {
   );
 }
 
-function BoughtList() {
+function BoughtList({
+  boughtItems,
+  onClearBoughtItems,
+  totalBoughtItemsPrice,
+}) {
   return (
     <div className="border bought-list">
       <h2>So far you have bought:</h2>
 
       <div className="bought-flex">
         <div className="bought-items">
-          <BoughtItem>Socks</BoughtItem>
-          <BoughtItem>Gloves</BoughtItem>
-          <BoughtItem>Hat</BoughtItem>
-          <BoughtItem>Wallet</BoughtItem>
-          <BoughtItem>Sun-cream</BoughtItem>
+          {boughtItems.map((item) => (
+            <BoughtItem boughtItem={item.item} key={item.id} />
+          ))}
         </div>
         <div className="bottom-bought">
-          <Button style={{ backgroundColor: "#F81616" }}>Clear</Button>
-          <p>Total spent so far: £245</p>
+          <Button
+            onClick={onClearBoughtItems}
+            style={{ backgroundColor: "#F81616" }}
+          >
+            Clear
+          </Button>
+          <p>Total spent so far: £{totalBoughtItemsPrice}</p>
         </div>
       </div>
     </div>
   );
 }
 
-function BoughtItem({ children }) {
-  return <div className="bought-item">{children}</div>;
+function BoughtItem({ boughtItem }) {
+  return <div className="bought-item">{boughtItem}</div>;
 }
 
 function ListBalance() {
@@ -205,9 +253,13 @@ function ListBalance() {
   );
 }
 
-function Button({ children, style, onClick, id }) {
+function Button({ children, style, onClick, id, item, price }) {
   return (
-    <div className="button" style={style} onClick={() => onClick(id)}>
+    <div
+      className="button"
+      style={style}
+      onClick={() => onClick(item, price, id)}
+    >
       {children}
     </div>
   );
