@@ -11,6 +11,12 @@ export default function App() {
     }, 0)
     .toFixed(2);
 
+  let totalItems = items
+    .reduce((acc, cur) => {
+      return acc + Number(cur.price);
+    }, 0)
+    .toFixed(2);
+
   function handleAddItem(item) {
     setItems((items) => [...items, item]);
   }
@@ -48,7 +54,7 @@ export default function App() {
             onClearBoughtItems={handleClearBoughtItems}
             totalBoughtItemsPrice={totalBoughtItems}
           />
-          <ListBalance />
+          <ListBalance totalPrice={totalItems} />
         </div>
       </div>
     </>
@@ -244,11 +250,11 @@ function BoughtItem({ boughtItem }) {
   return <div className="bought-item">{boughtItem}</div>;
 }
 
-function ListBalance() {
+function ListBalance({ totalPrice }) {
   return (
     <div className="border list-balance">
       <h2>Balance of current list:</h2>
-      <p className="total">£120</p>
+      <p className="total">£{totalPrice}</p>
     </div>
   );
 }
