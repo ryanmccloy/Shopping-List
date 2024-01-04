@@ -218,6 +218,7 @@ h2 {
   border: 1px solid #3c6e71;
   background-color: #ffffff;
   border-radius: 4px;
+  padding-left: 10px;
 }
 
 .submit-button {
