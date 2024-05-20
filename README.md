@@ -1,6 +1,7 @@
 Shopping List App 🤑
 
 _ Simple personal project using Create React App and useState_
+(This project is non responsive, and was just to get practice with using state for the first time)
 
 This can be accessed at:
 https://shopping-list-mocha.vercel.app/
