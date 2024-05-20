@@ -2,6 +2,9 @@ Shopping List App 🤑
 
 _ Simple personal project using Create React App and useState_
 
+This can be accessed at:
+https://shopping-list-mocha.vercel.app/
+
 Overview
 The Shopping List App is a convenient tool designed to manage your shopping experience efficiently. It allows you to keep track of items you plan to purchase, tallying up the total cost as you shop. Once you've bought an item, you can easily move it to the "Bought" section, where the app will calculate the total of your purchased goods, helping you to stay within budget.
 
